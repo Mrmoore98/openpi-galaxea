@@ -127,17 +127,31 @@ def eval_libero(args: Args) -> None:
                     if not action_plan:
                         # Finished executing previous action chunk -- compute new chunk
                         # Prepare observations dict
+                        # element = {
+                        #     "observation/image": img,
+                        #     "observation/wrist_image": wrist_img,
+                        #     "observation/state": np.concatenate(
+                        #         (
+                        #             obs["robot0_eef_pos"],
+                        #             _quat2axisangle(obs["robot0_eef_quat"]),
+                        #             obs["robot0_gripper_qpos"],
+                        #         )
+                        #     ),
+                        #     "prompt": str(task_description),
+                        # }
                         element = {
-                            "observation/image": img,
-                            "observation/wrist_image": wrist_img,
-                            "observation/state": np.concatenate(
+                            "images": {
+                                "primary": img,
+                                "wrist_left": wrist_img,
+                            },
+                            "proprio": np.concatenate(
                                 (
                                     obs["robot0_eef_pos"],
                                     _quat2axisangle(obs["robot0_eef_quat"]),
                                     obs["robot0_gripper_qpos"],
                                 )
                             ),
-                            "prompt": str(task_description),
+                            "instruction": str(task_description),
                         }
 
                         # Query model to get action
@@ -170,7 +184,7 @@ def eval_libero(args: Args) -> None:
             imageio.mimwrite(
                 pathlib.Path(args.video_out_path) / f"rollout_{task_segment}_{suffix}.mp4",
                 [np.asarray(x) for x in replay_images],
-                fps=10,
+                fps=20,
             )
 
             # Log current results

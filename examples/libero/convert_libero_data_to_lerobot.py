@@ -19,13 +19,13 @@ Running this conversion script will take approximately 30 minutes.
 """
 
 import shutil
-
+import pathlib
 from lerobot.common.datasets.lerobot_dataset import LEROBOT_HOME
 from lerobot.common.datasets.lerobot_dataset import LeRobotDataset
 import tensorflow_datasets as tfds
 import tyro
 
-REPO_NAME = "your_hf_username/libero"  # Name of the output dataset, also used for the Hugging Face Hub
+REPO_NAME = "galaxea/libero"  # Name of the output dataset, also used for the Hugging Face Hub
 RAW_DATASET_NAMES = [
     "libero_10_no_noops",
     "libero_goal_no_noops",
@@ -36,9 +36,15 @@ RAW_DATASET_NAMES = [
 
 def main(data_dir: str, *, push_to_hub: bool = False):
     # Clean up any existing dataset in the output directory
-    output_path = LEROBOT_HOME / REPO_NAME
+    # output_path = LEROBOT_HOME / REPO_NAME
+    # LEROBOT_HOME = Path(os.getenv("LEROBOT_HOME", "~/.cache/huggingface/lerobot")).expanduser()
+    LEROBOT_HOME = pathlib.Path("/EFM-Pretrain/datasets/lerobot")
+    import os   
+    os.environ["LEROBOT_HOME"] = str(LEROBOT_HOME)
+    
+    output_path = pathlib.Path("/EFM-Pretrain/datasets/lerobot")
     if output_path.exists():
-        shutil.rmtree(output_path)
+        shutil.rmtree(output_path)        
 
     # Create LeRobot dataset, define features to store
     # OpenPi assumes that proprio is stored in `state` and actions in `action`

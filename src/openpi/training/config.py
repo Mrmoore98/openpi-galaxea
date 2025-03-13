@@ -446,9 +446,9 @@ _CONFIGS = [
         name="pi0_libero",
         model=pi0.Pi0Config(),
         data=LeRobotLiberoDataConfig(
-            repo_id="physical-intelligence/libero",
+            repo_id="galaxea/libero",
             base_config=DataConfig(
-                local_files_only=False,  # Set to True for local-only datasets.
+                local_files_only=True, #[yc] changed  # Set to True for local-only datasets.
                 prompt_from_task=True,
             ),
         ),

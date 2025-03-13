@@ -38,6 +38,9 @@ MANIFEST
 *.manifest
 *.spec
 
+third_party/
+
+
 # Installer logs
 pip-log.txt
 pip-delete-this-directory.txt
@@ -80,6 +83,8 @@ docs/_build/
 # PyBuilder
 .pybuilder/
 target/
+
+lerobot/
 
 # Jupyter Notebook
 .ipynb_checkpoints

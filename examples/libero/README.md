@@ -33,6 +33,7 @@ uv pip install -e packages/openpi-client
 uv pip install -e third_party/libero
 export PYTHONPATH=$PYTHONPATH:$PWD/third_party/libero
 
+
 # Run the simulation
 python examples/libero/main.py
 ```
@@ -54,3 +55,10 @@ If you follow the training instructions and hyperparameters in the `pi0_libero` 
 | π0 @ 30k (finetuned) | 96.8 | 98.8 | 95.8 | 85.2 | 94.15 |
 
 Note that the hyperparameters for these runs are not tuned and $\pi_0$-FAST does not use a FAST tokenizer optimized for Libero. Likely, the results could be improved with more tuning, we mainly use these results as an example of how to use openpi to fine-tune $\pi_0$ models on a new dataset.
+
+
+export HF_HOME=/EFM-Pretrain/yuanty/cache/huggingface
+export HF_HUB_CACHE=/EFM-Pretrain/yuanty/cache/huggingface/hub
+export TRANSFORMERS_CACHE=/EFM-Pretrain/yuanty/cache/huggingface/hub
+export PIP_CACHE_DIR=/EFM-Pretrain/yuanty/cache/pip
+export TORCH_HOME=/EFM-Pretrain/yuanty/cache/torch
