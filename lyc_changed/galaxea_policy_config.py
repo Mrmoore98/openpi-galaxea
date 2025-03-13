@@ -74,7 +74,6 @@ class GalaxeaDataConfig(DataConfigFactory):
         model_transforms = ModelTransformFactory(
             processor=PaliGemmaProcessor.from_pretrained(
                 'google/paligemma2-3b-pt-224', 
-                token='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', 
                 local_files_only=True
             )
         )(model_config)
