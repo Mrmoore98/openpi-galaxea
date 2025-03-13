@@ -85,6 +85,7 @@ class Pi0Config(_model.BaseModelConfig):
 
     # Set the model specific defaults.
     action_dim: int = 32
+    state_dim: int = 14 # [yc] for galaxea
     action_horizon: int = 50
     max_token_len: int = 48
 
@@ -179,7 +180,7 @@ class Pi0(_model.BaseModel):
         img.lazy_init(next(iter(config.fake_obs().images.values())), train=False, rngs=rngs)
         self.PaliGemma = nnx.Dict(llm=llm, img=img)
         # [yc] hard code
-        self.state_proj = nnx.Linear(config.action_dim+1, action_expert_config.width, rngs=rngs)
+        self.state_proj = nnx.Linear(config.state_dim, action_expert_config.width, rngs=rngs)
         self.action_in_proj = nnx.Linear(config.action_dim, action_expert_config.width, rngs=rngs)
         self.action_time_mlp_in = nnx.Linear(2 * action_expert_config.width, action_expert_config.width, rngs=rngs)
         self.action_time_mlp_out = nnx.Linear(action_expert_config.width, action_expert_config.width, rngs=rngs)
@@ -308,7 +309,7 @@ class Pi0(_model.BaseModel):
         num_steps: int | at.Int[at.Array, ""] = 10,
     ) -> _model.Actions:
         observation = _model.preprocess_observation(None, observation, train=False,
-                                                    image_keys=["base_0_rgb", "left_wrist_0_rgb"])
+                                                    image_keys=self.image_keys)
         # note that we use the convention more common in diffusion literature, where t=1 is noise and t=0 is the target
         # distribution. yes, this is the opposite of the pi0 paper, and I'm sorry.
         # dt = -1.0 / num_steps

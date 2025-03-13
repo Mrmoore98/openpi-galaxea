@@ -30,6 +30,8 @@ class Policy(BasePolicy):
         sample_kwargs: dict[str, Any] | None = None,
         metadata: dict[str, Any] | None = None,
     ):
+        
+        model.image_keys = sample_kwargs.pop('image_keys')
         self._sample_actions = nnx_utils.module_jit(model.sample_actions)
         # self._sample_actions = model.sample_actions
         self._input_transform = _transforms.compose(transforms)
@@ -41,27 +43,8 @@ class Policy(BasePolicy):
     @override
     def infer(self, obs: dict) -> dict:  # type: ignore[misc]
         self._rng, sample_rng = jax.random.split(self._rng)
-        # Make a copy since transformations may modify the inputs in place.
-        # inputs = jax.tree.map(lambda x: x, obs)
-        # inputs = self._input_transform(inputs)
-        # # import ipdb; ipdb.set_trace()
-        # # Make a batch and convert to jax.Array.
-        # inputs = jax.tree.map(lambda x: jnp.asarray(x)[np.newaxis, ...], inputs)
-
-        
-        
-        # outputs = {
-        #     "state": inputs["state"],
-        #     "actions": self._sample_actions(sample_rng, _model.Observation.from_dict(inputs), **self._sample_kwargs),
-        # }
-        # outputs = jax.tree.map(lambda x: np.asarray(x[0, ...]), outputs)
-        # print("="*100)
-        # print(outputs["actions"][0:5])
-        # print("="*100)
-        
         inputs = jax.tree.map(lambda x: x, obs)
         inputs = self._input_transform(inputs)   
-        # Make a batch and convert to jax.Array.
         # if True:
         #     import torch
         #     import pathlib
@@ -70,7 +53,9 @@ class Policy(BasePolicy):
         #     inputs["image"]["base_0_rgb"] = torch_inputs['pixel_values'][0,0].permute(1,2,0).numpy()
         #     inputs["image"]["left_wrist_0_rgb"] = torch_inputs['pixel_values'][0,1].permute(1,2,0).numpy()
         
+        # Make a batch and convert to jax.Array.
         inputs = jax.tree.map(lambda x: jnp.asarray(x)[np.newaxis, ...], inputs)
+        
         outputs = {
             "state": inputs["state"],
             "actions": self._sample_actions(sample_rng, _model.Observation.from_dict(inputs), **self._sample_kwargs),
@@ -78,16 +63,7 @@ class Policy(BasePolicy):
 
         # Unbatch and convert to np.ndarray.
         outputs = jax.tree.map(lambda x: np.asarray(x[0, ...]), outputs)
-        # print("="*100)
-        # print(outputs["actions"][0:5])
-        # print("="*100)
         outputs = self._output_transform(outputs)
-        # print("="*100)
-        # print(outputs["actions"][0:5])
-        # print("="*100)
-        # import ipdb; ipdb.set_trace()
-
-        
         return outputs
 
     @property

@@ -7,12 +7,10 @@ import openpi.training.weight_loaders as weight_loaders
 from openpi.training.config import DataConfigFactory, DataConfig, GroupFactory, TrainConfig
 from typing_extensions import override
 
-from transformers.models.paligemma.processing_paligemma import PaliGemmaProcessor
-# from lyc_changed.galaxea_policy import GalaxeaInputs, GalaxeaOutputs
-from lyc_changed.libero_policy import LiberoInputs, LiberoOutputs
 import lyc_changed.pi0 as pi0
+from transformers.models.paligemma.processing_paligemma import PaliGemmaProcessor
+from lyc_changed.galaxea_policy import GalaxeaInputs, GalaxeaOutputs
 from lyc_changed.policy_config import ProcessImage
-
 
 
 @dataclasses.dataclass(frozen=True)
@@ -55,13 +53,9 @@ class GalaxeaDataConfig(DataConfigFactory):
 
         # Prepare data for policy training
         # Convert images to uint8 numpy arrays, add masks
-        # data_transforms = _transforms.Group(
-        #     inputs=[GalaxeaInputs(action_dim=model_config.action_dim, model_type=model_config.model_type)],
-        #     outputs=[GalaxeaOutputs()],
-        # )
         data_transforms = _transforms.Group(
-            inputs=[LiberoInputs(action_dim=model_config.action_dim, model_type=model_config.model_type)],
-            outputs=[LiberoOutputs()],
+            inputs=[GalaxeaInputs(action_dim=model_config.action_dim, model_type=model_config.model_type)],
+            outputs=[GalaxeaOutputs()],
         )
         # Use delta actions (not for gripper)
         # delta_action_mask = _transforms.make_bool_mask(6, -1)
@@ -74,7 +68,6 @@ class GalaxeaDataConfig(DataConfigFactory):
         model_transforms = ModelTransformFactory(
             processor=PaliGemmaProcessor.from_pretrained(
                 'google/paligemma2-3b-pt-224', 
-                token="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",
                 local_files_only=True
             )
         )(model_config)
@@ -87,15 +80,20 @@ class GalaxeaDataConfig(DataConfigFactory):
         )
 
 
-galaxea_zero_config = TrainConfig(
+galaxea_zero_real_world_config = TrainConfig(
     name="pi0_libero",
-    model=pi0.Pi0Config(action_dim=7, state_dim=8),
+    model=pi0.Pi0Config(
+        action_dim=14, 
+        state_dim=14,
+        max_token_len=55,
+        action_horizon=20,
+    ),
     data=GalaxeaDataConfig(
         repo_id="galaxea/libero",
         base_config=DataConfig(
             local_files_only=True, #[yc] changed  # Set to True for local-only datasets.
             prompt_from_task=True,
-            use_quantile_norm=True,
+            use_quantile_norm=False,
         ),
     ),
     weight_loader=weight_loaders.CheckpointWeightLoader("s3://openpi-assets/checkpoints/pi0_base/params"),

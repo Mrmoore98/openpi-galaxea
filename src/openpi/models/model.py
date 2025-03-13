@@ -87,7 +87,7 @@ class Observation(Generic[ArrayT]):
     # Image masks, with same keys as images.
     image_masks: dict[str, at.Bool[ArrayT, "*b"]]
     # Low-dimensional robot state.
-    state: at.Float[ArrayT, "*b s"]
+    state: at.Float[ArrayT, "*b s"] # [yc] FIXME
 
     # Tokenized prompt.
     tokenized_prompt: at.Int[ArrayT, "*b l"] | None = None
@@ -102,7 +102,7 @@ class Observation(Generic[ArrayT]):
     token_loss_mask: at.Bool[ArrayT, "*b l"] | None = None
 
     @classmethod
-    def from_dict(cls, data: at.PyTree[ArrayT]) -> "Observation[ArrayT]":
+    def from_dict(cls, data: at.PyTree[ArrayT], image_keys: Sequence[str] = IMAGE_KEYS) -> "Observation[ArrayT]":
         """This method defines the mapping between unstructured data (i.e., nested dict) to the structured Observation format."""
         # Ensure that tokenized_prompt and tokenized_prompt_mask are provided together.
         if ("tokenized_prompt" in data) != ("tokenized_prompt_mask" in data):

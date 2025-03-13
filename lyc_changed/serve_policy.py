@@ -4,6 +4,7 @@ import logging
 import socket
 
 import tyro
+import pathlib
 
 from openpi.policies import policy as _policy
 from openpi.serving import websocket_policy_server
@@ -12,6 +13,7 @@ import sys
 sys.path.append("/EFM-Pretrain/lyc/openpi")
 from lyc_changed.policy_config import create_torch_policy
 from lyc_changed.galaxea_policy_config import galaxea_zero_config
+from lyc_changed.galaxea_policy_realworld_config import galaxea_zero_real_world_config
 
 class EnvMode(enum.Enum):
     """Supported environments."""
@@ -63,10 +65,14 @@ class Args:
     
 def main(args: Args) -> None:
     policy = create_torch_policy(
-        galaxea_zero_config, 
+        galaxea_zero_real_world_config, 
         args.policy.dir, 
         default_prompt=args.default_prompt,
-        norm_stats=args.policy.norm_stats
+        norm_stats=pathlib.Path(args.policy.dir) / "dataset_statistics.json",
+        unnorm_key=args.policy.unnorm_key,
+        sample_kwargs={
+            'image_keys': ['base_0_rgb', 'left_wrist_0_rgb', 'right_wrist_0_rgb']
+        }
     )
     policy_metadata = policy.metadata
 
@@ -87,6 +93,7 @@ def main(args: Args) -> None:
     server.serve_forever()
 
 
+# uv run lyc_changed/serve_policy.py policy:checkpoint --policy.config=pi0_libero --policy.dir=jax_params --policy.unnorm-key libero_spatial_no_noops
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, force=True)
     main(tyro.cli(Args))

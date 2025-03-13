@@ -181,6 +181,7 @@ def create_torch_policy(
     sample_kwargs: dict[str, Any] | None = None,
     default_prompt: str | None = None,
     norm_stats: dict[str, _transforms.NormStats] | None = None,
+    unnorm_key: str | None = 'libero_spatial_no_noops',
 ) -> _policy.Policy:
     """Create a policy from a trained checkpoint.
 
@@ -212,7 +213,7 @@ def create_torch_policy(
     # if norm_stats is None:
     # We are loading the norm stats from the checkpoint instead of the config assets dir to make sure
     # that the policy is using the same normalization stats as the original training process.
-    norm_stats = load_norm_stats(norm_stats, 'libero_spatial_no_noops')
+    norm_stats = load_norm_stats(norm_stats, unnorm_key)
     
     
     # import ipdb; ipdb.set_trace()

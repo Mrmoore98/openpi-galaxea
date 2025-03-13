@@ -432,7 +432,11 @@ def compare_params(params1, params2, prefix=""):
 
 if __name__ == "__main__":
     # 加载PyTorch模型权重
-    torch_state = torch.load("/EFM-Pretrain/galaxea_0/runs/ft_libero_pi_wrist_cam_fp32_halfdata--pi_half_data/model_15000.pt")
+    torch_state_path = "/EFM-Pretrain/yuanty/code/galaxea_0/runs/deskorgv2_depthall_to1_ta20_3cam_dropwrist0.3--0312_080232/model_4000.pt"
+    torch_state = torch.load(torch_state_path)
+    
+    # use torch_state path
+    save_path = os.path.dirname(torch_state_path)
     if 'model' in torch_state:
         torch_state = torch_state['model']
     
@@ -459,4 +463,4 @@ if __name__ == "__main__":
     compare_params(jax_params, jax_params_origin)
     
     # 保存JAX参数
-    save_jax_params(jax_params, "jax_params") 
+    save_jax_params(jax_params, save_path) 

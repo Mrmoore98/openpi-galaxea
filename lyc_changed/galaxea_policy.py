@@ -21,6 +21,8 @@ def _parse_image(image) -> np.ndarray:
     image = np.asarray(image)
     if np.issubdtype(image.dtype, np.floating):
         image = (255 * image).astype(np.uint8)
+    if image.shape[0] == 1 and len(image.shape) == 4:
+        image = image[0]
     if image.shape[0] == 3:
         image = einops.rearrange(image, "c h w -> h w c")
     return image
@@ -38,13 +40,13 @@ class GalaxeaInputs(transforms.DataTransformFn):
 
         # Get the state. We are padding from 8 to the model action dim.
         # For pi0-FAST, we don't pad the state (action_dim = 7, which is < 8, so pad is skipped).
-        state = transforms.pad_to_dim(data["proprio"], self.action_dim)
+        state = data["proprio"][0] # [yc] FIXME this a hard code. 
 
         # Possibly need to parse images to uint8 (H,W,C) since LeRobot automatically
         # stores as float32 (C,H,W), gets skipped for policy inference
-        base_image = _parse_image(data["primary"])
-        wrist_image = _parse_image(data["wrist_left"])
-        wrist_image_right = _parse_image(data["wrist_right"])
+        base_image = _parse_image(data["images"]["head_rgb"])
+        wrist_image = _parse_image(data["images"]["left_hand_rgb"])
+        wrist_image_right = _parse_image(data["images"]["right_hand_rgb"])
 
         inputs = {
             "state": state,
@@ -64,7 +66,7 @@ class GalaxeaInputs(transforms.DataTransformFn):
         if "actions" in data:
             # We are padding from 7 to the model action dim.
             # For pi0-FAST, this is a no-op (since action_dim = 7).
-            actions = transforms.pad_to_dim(data["actions"], self.action_dim)
+            actions = data["actions"]
             inputs["actions"] = actions
 
         if "instruction" in data:
