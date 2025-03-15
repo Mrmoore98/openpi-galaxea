@@ -154,6 +154,18 @@ class Pi0Config(_model.BaseModelConfig):
             return nnx.Nothing
         return nnx.All(*filters)
 
+# a JAX MLP
+class ActionMLP(nnx.Module):
+    def __init__(self, in_features: int, out_features: int, hidden_features: int, rngs: nnx.Rngs):
+        self.linear1 = nnx.Linear(in_features, hidden_features, rngs=rngs)
+        self.linear2 = nnx.Linear(hidden_features, out_features, rngs=rngs)
+
+    def __call__(self, x: at.Float[at.Array, "b s"]):
+        x = self.linear1(x)
+        x = nnx.swish(x)
+        x = self.linear2(x)
+        return x
+
 
 class Pi0(_model.BaseModel):
     def __init__(self, config: Pi0Config, rngs: nnx.Rngs):
@@ -184,7 +196,13 @@ class Pi0(_model.BaseModel):
         self.action_in_proj = nnx.Linear(config.action_dim, action_expert_config.width, rngs=rngs)
         self.action_time_mlp_in = nnx.Linear(2 * action_expert_config.width, action_expert_config.width, rngs=rngs)
         self.action_time_mlp_out = nnx.Linear(action_expert_config.width, action_expert_config.width, rngs=rngs)
-        self.action_out_proj = nnx.Linear(action_expert_config.width, config.action_dim, rngs=rngs)
+        # self.action_out_proj = nnx.Linear(action_expert_config.width, config.action_dim, rngs=rngs)
+        self.action_out = ActionMLP(
+            action_expert_config.width,
+            config.action_dim,
+            action_expert_config.width,
+            rngs=rngs
+        )
 
     @at.typecheck
     def embed_prefix(
@@ -356,7 +374,8 @@ class Pi0(_model.BaseModel):
                 [None, suffix_tokens], mask=full_attn_mask, positions=positions, kv_cache=kv_cache
             )
             assert prefix_out is None
-            v_t = self.action_out_proj(suffix_out[:, -self.action_horizon :])
+            # v_t = self.action_out_proj(suffix_out[:, -self.action_horizon :])
+            v_t = self.action_out(suffix_out[:, -self.action_horizon :])
             # jax.debug.print("count: {count}, v_t: {v_t}", count=count, v_t=v_t[0,0])
             # jax.debug.print("-"*100)
             # jax.debug.print("count: {count}, x_t: {x_t}", count=count, x_t=x_t[0,0])

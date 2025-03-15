@@ -13,7 +13,7 @@ import sys
 sys.path.append("/EFM-Pretrain/lyc/openpi")
 from lyc_changed.policy_config import create_torch_policy
 from lyc_changed.galaxea_policy_config import galaxea_zero_config
-from lyc_changed.galaxea_policy_realworld_config import galaxea_zero_real_world_config
+from lyc_changed.galaxea_policy_realworld_config_best import galaxea_zero_real_world_config
 
 class EnvMode(enum.Enum):
     """Supported environments."""
