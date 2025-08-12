@@ -442,7 +442,7 @@ def compare_params(params1, params2, prefix=""):
 
 if __name__ == "__main__":
     # 加载PyTorch模型权重
-    torch_state_path = "/EFM-Pretrain/yuanty/code/galaxea_0/runs/deskorgv3_depthall_to1_ta32_3cam_nocrop_dropwrist0.3_lastaction--0313_164507/model_3000.pt"
+    torch_state_path = "/EFM-Pretrain/taojiang/code/galaxea_0_running/runs/deskorgv5_nodisturb_depthall_to1_ta32_3cam_nocrop_dropwrist0.3_droplastaction0.3_bs32_reweight--0319_103904/model_100000.pt"
 
     torch_state = torch.load(torch_state_path)
     
